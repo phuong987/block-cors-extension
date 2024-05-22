@@ -4,32 +4,28 @@ const prefs = {
   'enabled': false,
   'overwrite-origin': true,
   'overwrite-methods': true,
-  'methods': ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH']
+  'methods': ['GET', 'HEAD', 'POST', 'DELETE', 'PUT', 'OPTIONS', 'PATCH'] // GET, HEAD, POST needn't Access-Control-Allow-Methods
 };
 const cors = {};
 
 cors.onHeadersReceived = ({responseHeaders}) => {
+  // if resource server return the preflight request without header 'Access-Control-Allow-Origin'
+  // that also mean that browser will block all CORS request
   if (
     prefs['overwrite-origin'] === true ||
     responseHeaders.find(({name}) => name.toLowerCase() === 'access-control-allow-origin') === undefined
   ) {
     responseHeaders.push({
       'name': 'Access-Control-Allow-Origin',
-      'value': '*'
+      'value': 'http://localhost:63342'
     });
-  }
-  if (
-    prefs['overwrite-methods'] === true ||
-    responseHeaders.find(({name}) => name.toLowerCase() === 'access-control-allow-methods') === undefined
-  ) {
-    responseHeaders.push({
-      'name': 'Access-Control-Allow-Origin',
-      'value': '*'
-    });
-    responseHeaders.push({
-      'name': 'Access-Control-Allow-Methods',
-      'value': prefs.methods.join(', ')
-    });
+
+    if (prefs['overwrite-methods'] === true) {
+      responseHeaders.push({
+        'name': 'Access-Control-Allow-Methods',
+        'value': prefs.methods.join(', ')
+      });
+    }
   }
 
   return {responseHeaders};
@@ -78,33 +74,31 @@ chrome.browserAction.onClicked.addListener(() => chrome.storage.local.set({
 }));
 
 chrome.contextMenus.onClicked.addListener(info => {
-  const ps = {};
-  if (info.menuItemId === 'test-cors') {
-    chrome.tabs.create({
-      url: 'https://webbrowsertools.com/test-cors/'
-    });
-  }
-  else if (info.menuItemId === 'overwrite-origin' || info.menuItemId === 'overwrite-methods') {
-    ps[info.menuItemId] = info.checked;
+  const properties = {};
+
+  if (info.menuItemId === 'overwrite-origin' || info.menuItemId === 'overwrite-methods') {
+    properties[info.menuItemId] = info.checked;
   }
   else {
+    properties.methods = prefs.methods;
     if (info.checked) {
-      prefs.methods.push(info.menuItemId);
+      properties.methods.push(info.menuItemId);
     }
     else {
       const index = prefs.methods.indexOf(info.menuItemId);
       if (index !== -1) {
-        prefs.methods.splice(index, 1);
+        properties.methods.splice(index, 1);
       }
     }
-    ps.methods = prefs.methods;
   }
-  chrome.storage.local.set(ps);
+  // store key-value properties into Chrome's local storage.
+  chrome.storage.local.set(properties);
 });
 
 /* init */
-chrome.storage.local.get(prefs, ps => {
-  Object.assign(prefs, ps);
+chrome.storage.local.get(prefs, propertiesStored => {
+  // merges the fetched preferences (propertiesStored) with the default preferences (prefs)
+  Object.assign(prefs, propertiesStored);
   /* context menu */
   chrome.contextMenus.create({
     title: 'Overwrite access-control-allow-origin',
@@ -157,12 +151,6 @@ chrome.storage.local.get(prefs, ps => {
     contexts: ['browser_action'],
     checked: prefs.methods.indexOf('PATCH') !== -1,
     parentId: menu
-  });
-
-  chrome.contextMenus.create({
-    title: 'Test CORS',
-    id: 'test-cors',
-    contexts: ['browser_action']
   });
 
   cors.onCommand();
