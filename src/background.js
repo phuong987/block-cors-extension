@@ -4,31 +4,32 @@ const prefs = {
   'enabled': false,
   'overwrite-origin': true,
   'overwrite-methods': true,
-  'methods': ['GET', 'HEAD', 'POST', 'DELETE', 'PUT', 'OPTIONS', 'PATCH'] // GET, HEAD, POST needn't Access-Control-Allow-Methods
+  'methods': ['GET', 'HEAD', 'POST'] // GET, HEAD, POST needn't Access-Control-Allow-Methods to make CORS request
 };
 const cors = {};
+const bypassOrigin = ['http://localhost:63342'];
 
-cors.onHeadersReceived = ({responseHeaders}) => {
+cors.onHeadersReceived = (details) => {
   // if resource server return the preflight request without header 'Access-Control-Allow-Origin'
   // that also mean that browser will block all CORS request
-  if (
-    prefs['overwrite-origin'] === true ||
-    responseHeaders.find(({name}) => name.toLowerCase() === 'access-control-allow-origin') === undefined
-  ) {
-    responseHeaders.push({
+  // Only request's origin (initiator) listed in bypassOrigin will overwrite 'Access-Control-Allow-Origin'
+  let flag = bypassOrigin.find(s => s === details.initiator) !== undefined;
+
+  if (prefs['overwrite-origin'] === true && flag) {
+    details.responseHeaders.push({
       'name': 'Access-Control-Allow-Origin',
-      'value': 'http://localhost:63342'
+      'value': bypassOrigin.join(', ')
     });
 
     if (prefs['overwrite-methods'] === true) {
-      responseHeaders.push({
+      details.responseHeaders.push({
         'name': 'Access-Control-Allow-Methods',
         'value': prefs.methods.join(', ')
       });
     }
   }
 
-  return {responseHeaders};
+  return {responseHeaders: details.responseHeaders};
 };
 
 cors.install = () => {
@@ -69,9 +70,9 @@ chrome.storage.onChanged.addListener(ps => {
   cors.onCommand();
 });
 
-chrome.browserAction.onClicked.addListener(() => chrome.storage.local.set({
-  enabled: prefs.enabled === false
-}));
+chrome.browserAction.onClicked.addListener(() => {
+  chrome.storage.local.set({enabled: prefs.enabled === false})
+});
 
 chrome.contextMenus.onClicked.addListener(info => {
   const properties = {};
