@@ -77,7 +77,12 @@ chrome.browserAction.onClicked.addListener(() => {
 chrome.contextMenus.onClicked.addListener(info => {
   const properties = {};
 
-  if (info.menuItemId === 'overwrite-origin' || info.menuItemId === 'overwrite-methods') {
+  if (info.menuItemId === 'open-chart-page') {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('chart.html')
+    });
+  }
+  else if (info.menuItemId === 'overwrite-origin' || info.menuItemId === 'overwrite-methods') {
     properties[info.menuItemId] = info.checked;
   }
   else {
@@ -114,6 +119,11 @@ chrome.storage.local.get(prefs, propertiesStored => {
     id: 'overwrite-methods',
     contexts: ['browser_action'],
     checked: prefs['overwrite-methods']
+  });
+  chrome.contextMenus.create({
+    title: 'Open chart page',
+    id: 'open-chart-page',
+    contexts: ['browser_action']
   });
 
   const menu = chrome.contextMenus.create({
