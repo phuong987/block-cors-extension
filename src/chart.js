@@ -106,16 +106,22 @@ window.addEventListener('load', () => {
     // window.webkitRequestFileSystem(window.PERSISTENT, 1024*1024, onInitFs, errorHandler);
 })
 
-updateDataForDateRange= async (startDate, endDate) => {
+updateDataForDateRange = async (startDate, endDate) => {
     let currentDate = startDate;
 
     while (currentDate <= endDate) {
         let [day, month, year] = currentDate.toLocaleDateString().split("/");
         let formattedDate = `${year}-${month}-${day}`;
-        currentDate.setDate(currentDate.getDate() + 1);
         const data = await getData(formattedDate);
-        if (data === null) continue;
-        updateData(data);
+
+        if (data !== null) {
+            if (currentDate === startDate) {
+                overwriteData(data);
+            } else {
+                addOrUpdateData(data, null);
+            }
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
     }
 }
 

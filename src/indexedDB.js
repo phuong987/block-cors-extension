@@ -23,8 +23,9 @@ initDB = () => {
 
         request.onupgradeneeded = function(event) {
             db = event.target.result;
-            let objectStore = db.createObjectStore('jsonStore', { keyPath: 'id', autoIncrement: true });
-            objectStore.createIndex('date', ['date'], { unique: true });
+            // {keyPath: 'date'} mean date is PK, so can use objectStore.delete(PK)
+            let objectStore = db.createObjectStore('jsonStore', {keyPath: 'date'});
+            //objectStore.createIndex('dateIndex', 'date', { unique: true });
         };
     });
 }
@@ -47,12 +48,22 @@ function loadData() {
     });
 }
 
-function updateData(newData) {
+function overwriteData(newData) {
     let transaction = db.transaction(['jsonStore'], 'readwrite');
     let objectStore = transaction.objectStore('jsonStore');
+    let request = objectStore.delete(newData.date);
 
-    // Using objectStore.put to delete available record has same unique key, then save newData
-    let request = objectStore.put(newData);
+    request.onsuccess = function(event) {
+        addOrUpdateData(newData, objectStore);
+    };
+}
+
+function addOrUpdateData(newData, objectStore) {
+    if (objectStore == null) {
+        let transaction = db.transaction(['jsonStore'], 'readwrite');
+        objectStore = transaction.objectStore('jsonStore');
+    }
+    let request = objectStore.add(newData);
 
     request.onsuccess = function(event) {
         console.log('Data updated: ', newData.date);
