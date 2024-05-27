@@ -48,28 +48,39 @@ function loadData() {
     });
 }
 
-function overwriteData(newData) {
-    let transaction = db.transaction(['jsonStore'], 'readwrite');
-    let objectStore = transaction.objectStore('jsonStore');
-    let request = objectStore.delete(newData.date);
+function overwriteData (newData) {
+    return new Promise((resolve, reject) => {
+        let transaction = db.transaction(['jsonStore'], 'readwrite');
+        let objectStore = transaction.objectStore('jsonStore');
+        let request = objectStore.delete(newData.date);
 
-    request.onsuccess = function(event) {
-        addOrUpdateData(newData, objectStore);
-    };
+        request.onsuccess = async function () {
+            await addOrUpdateData(newData, objectStore);
+            resolve();
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
+    });
 }
 
+// any call "await addOrUpdateData" may not continue to execute if state "pending" not change
 function addOrUpdateData(newData, objectStore) {
-    if (objectStore == null) {
-        let transaction = db.transaction(['jsonStore'], 'readwrite');
-        objectStore = transaction.objectStore('jsonStore');
-    }
-    let request = objectStore.add(newData);
+    return new Promise((resolve, reject) => {
+        if (objectStore == null) {
+            let transaction = db.transaction(['jsonStore'], 'readwrite');
+            objectStore = transaction.objectStore('jsonStore');
+        }
+        let request = objectStore.add(newData);
 
-    request.onsuccess = function(event) {
-        console.log('Data updated: ', newData.date);
-    };
+        request.onsuccess = function() {
+            console.log('Data updated: ', newData.date);
+            resolve(); // change state "pending" -> "success"
+        };
 
-    request.onerror = function(event) {
-        console.error('Update data error:', event.target.error);
-    };
+        request.onerror = function(event) {
+            reject(event.target.error); // throw exception and change state "pending" -> "error"
+        };
+    });
 }
