@@ -152,13 +152,13 @@ let initGapData = (element, isRising, mul) => {
         dps3.push({
             x: new Date(element.date + "T00:00:00.000+07:00"),
             y: gapMax * mul,
-            detail: detail
+            detail: detail.slice(0, detail.length - 5)
         });
     } else {
         dps3.push({
             x: new Date(element.date + "T00:00:00.000+07:00"),
             y: gapMin * mul,
-            detail: detail
+            detail: detail.slice(0, detail.length - 5)
         });
     }
 }

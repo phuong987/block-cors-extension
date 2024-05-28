@@ -25,12 +25,7 @@ window.addEventListener('load', () => {
                 toolTip: {
                     shared: true,
                     enabled: true,
-                    // contentFormatter: function (e) {
-                    //     let content = "Gap: " + (e.entries[0].dataPoint.y).toLocaleString() + " VND<br/>";
-                    //     content += "Detail: " + "<div>" + e.entries[0].dataPoint.detail + "<div/>";
-                    //
-                    //     return content;
-                    // }
+                    content: "<span style='\"'color: {color};'\"'>{x}<br/>{name}: {y}<br/>{detail}</span>"
                 },
                 legend: {
                     cursor: "pointer",
@@ -57,6 +52,15 @@ window.addEventListener('load', () => {
                         markerSize: 0,
                         yValueFormatString: "#,###.## VND",
                         dataPoints: dps4
+                    },
+                    {
+                        type:"line",
+                        //axisYType: "secondary",
+                        name: "Gap DOJI",
+                        showInLegend: false,
+                        markerSize: 0,
+                        yValueFormatString: "#,###.## VND",
+                        dataPoints: dps5
                     }
                 ]
             }
