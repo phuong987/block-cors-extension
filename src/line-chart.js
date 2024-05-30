@@ -15,6 +15,38 @@ function newLineChart() {
                     }
                 },
                 axisY: {
+                    stripLines: [
+                        {
+                            value: lineChartPointsPNJ.at(-1).y,
+                            lineDashType: "dot",
+                            label: lineChartPointsPNJ.at(-1).y.toLocaleString(),
+                            color: "#6c78ac",
+                            labelAlign: "near",
+                            labelPlacement: "outside",
+                            labelFontColor: "white",
+                            labelBackgroundColor: "#6c78ac"
+                        },
+                        {
+                            value: lineChartPointsSJC.at(-1).y,
+                            lineDashType: "dot",
+                            label: lineChartPointsSJC.at(-1).y.toLocaleString(),
+                            color: "#52cda0",
+                            labelAlign: "near",
+                            labelPlacement: "outside",
+                            labelFontColor: "white",
+                            labelBackgroundColor: "#52cda0"
+                        },
+                        {
+                            value: lineChartPointsDOJI.at(-1).y,
+                            lineDashType: "dot",
+                            label: lineChartPointsDOJI.at(-1).y.toLocaleString(),
+                            color: "#e07a70",
+                            labelAlign: "near",
+                            labelPlacement: "outside",
+                            labelFontColor: "white",
+                            labelBackgroundColor: "#e07a70"
+                        }
+                    ]
                     //prefix: "VND "
                 },
                 toolTip: {
@@ -32,6 +64,7 @@ function newLineChart() {
                 data: [
                     {
                         type:"line",
+                        color: "#6c78ac",
                         //axisYType: "secondary",
                         name: "Gap PNJ",
                         showInLegend: false,
@@ -41,6 +74,7 @@ function newLineChart() {
                     },
                     {
                         type:"line",
+                        color: "#52cda0",
                         //axisYType: "secondary",
                         name: "Gap SJC",
                         showInLegend: false,
@@ -50,6 +84,7 @@ function newLineChart() {
                     },
                     {
                         type:"line",
+                        color: "#e07a70",
                         //axisYType: "secondary",
                         name: "Gap DOJI",
                         showInLegend: false,

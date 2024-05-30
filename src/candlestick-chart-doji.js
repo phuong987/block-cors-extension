@@ -1,10 +1,13 @@
 let csChartPointsDOJI = [], csNavigatePointsDOJI = [], csScaleBreakPointsDOJI = [];
 let candlestickChartDOJI;
 window.addEventListener('load', async () => {
+    initCandlestickData(await (await fetch("./data/data-doji.json")).json(),
+        1000, csChartPointsDOJI, csNavigatePointsDOJI, csScaleBreakPointsDOJI);
+
     candlestickChartDOJI = new CanvasJS.StockChart("candlestickChartDOJIContainer", {
         theme: "light2",
         exportEnabled: true,
-        title: {},
+        title: {text: "Candlestick Chart"},
         subtitles: [{text: "DOJI Gold Price (in VND)"}],
         charts: [
             {
@@ -21,6 +24,18 @@ window.addEventListener('load', async () => {
                     }
                 },
                 axisY: {
+                    stripLines: [
+                        {
+                            value: csChartPointsDOJI.at(-1).y[3],
+                            lineDashType: "dot",
+                            label: csChartPointsDOJI.at(-1).y[3].toLocaleString(),
+                            color: csChartPointsDOJI.at(-1).color,
+                            labelAlign: "near",
+                            labelPlacement: "outside",
+                            labelFontColor: "white",
+                            labelBackgroundColor: csChartPointsDOJI.at(-1).color
+                        }
+                    ]
                     //prefix: "VND "
                 },
                 data: [{
@@ -43,7 +58,5 @@ window.addEventListener('load', async () => {
         }
     });
 
-    initCandlestickData(await (await fetch("./data/data-doji.json")).json(),
-        1000, csChartPointsDOJI, csNavigatePointsDOJI, csScaleBreakPointsDOJI);
     candlestickChartDOJI.render();
 })

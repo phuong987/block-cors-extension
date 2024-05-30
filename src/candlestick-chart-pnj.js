@@ -8,11 +8,27 @@ let csChartPointsPNJ = [], csNavigatePointsPNJ = [], csScaleBreakPointsPNJ = [];
 let candlestickChartPNJ;
 let lineChartPointsPNJ = [];
 
-window.addEventListener('load', () => {
-    candlestickChartPNJ = new CanvasJS.StockChart("candlestickChartPNJContainer",{
+window.addEventListener('load', async () => {
+    await initDB().then(async () => {
+        let dataStored = await loadData();
+        if (dataStored.length === 0) {
+            await updateDataForDateRange(startDate, today);
+        } else {
+            let newestDate = new Date(dataStored[dataStored.length - 1].date + "T00:00:00.000+07:00");
+            await updateDataForDateRange(newestDate, today);
+        }
+
+        await loadData().then(async data => {
+            initCandlestickDataPNJ(data, mul, csChartPointsPNJ, csNavigatePointsPNJ, csScaleBreakPointsPNJ);
+            initLineData(await (await fetch("./data/data-doji.json")).json(), lineChartPointsDOJI, 1000);
+            initLineData(await (await fetch("./data/data-sjc.json")).json(), lineChartPointsSJC, 1000);
+        });
+    });
+
+    candlestickChartPNJ = new CanvasJS.StockChart("candlestickChartPNJContainer", {
         theme: "light2",
         exportEnabled: true,
-        title:{text:"Candlestick Chart"},
+        title: {text: "Candlestick Chart"},
         subtitles: [{text: "PNJ Gold Price (in VND)"}],
         charts: [
             {
@@ -29,6 +45,18 @@ window.addEventListener('load', () => {
                     }
                 },
                 axisY: {
+                    stripLines: [
+                        {
+                            value: csChartPointsPNJ.at(-1).y[3],
+                            lineDashType: "dot",
+                            label: csChartPointsPNJ.at(-1).y[3].toLocaleString(),
+                            color: csChartPointsPNJ.at(-1).color,
+                            labelAlign: "near", // Aligns the label to the left
+                            labelPlacement: "outside", // Places the label outside the plot area
+                            labelFontColor: "white",
+                            labelBackgroundColor: csChartPointsPNJ.at(-1).color
+                        }
+                    ]
                     //prefix: "VND "
                 },
                 data: [{
@@ -36,7 +64,7 @@ window.addEventListener('load', () => {
                     yValueFormatString: "#,###.## VND",
                     risingColor: risingColor,
                     fallingColor: fallingColor,
-                    dataPoints : csChartPointsPNJ
+                    dataPoints: csChartPointsPNJ
                 }]
             }
         ],
@@ -51,25 +79,9 @@ window.addEventListener('load', () => {
         }
     });
 
-    initDB().then(async () => {
-        let dataStored = await loadData();
-        if (dataStored.length === 0) {
-            await updateDataForDateRange(startDate, today);
-        } else {
-            let newestDate = new Date(dataStored[dataStored.length -1].date + "T00:00:00.000+07:00");
-            await updateDataForDateRange(newestDate, today);
-        }
-
-        loadData().then(async data => {
-            initCandlestickDataPNJ(data, mul, csChartPointsPNJ, csNavigatePointsPNJ, csScaleBreakPointsPNJ);
-            candlestickChartPNJ.render();
-
-            initLineData(await (await fetch("./data/data-doji.json")).json(), lineChartPointsDOJI, 1000);
-            initLineData(await (await fetch("./data/data-sjc.json")).json(), lineChartPointsSJC, 1000);
-            newLineChart();
-            lineChart.render();
-        });
-    });
+    candlestickChartPNJ.render();
+    newLineChart();
+    lineChart.render();
 
     // chrome.runtime.getPackageDirectoryEntry(function(root) {
     //     root.getFile('./data/data.json', {}, function(fileEntry) {

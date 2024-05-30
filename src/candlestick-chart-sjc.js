@@ -1,10 +1,13 @@
 let csChartPointsSJC = [], csNavigatePointsSJC = [], csScaleBreakPointsSJC = [];
 let candlestickChartSJC;
 window.addEventListener('load', async () => {
+    initCandlestickData(await (await fetch("./data/data-sjc.json")).json(),
+        1000, csChartPointsSJC, csNavigatePointsSJC, csScaleBreakPointsSJC);
+
     candlestickChartSJC = new CanvasJS.StockChart("candlestickChartSJCContainer", {
         theme: "light2",
         exportEnabled: true,
-        title: {},
+        title: {text: "Candlestick Chart"},
         subtitles: [{text: "SJC Gold Price (in VND)"}],
         charts: [
             {
@@ -21,6 +24,18 @@ window.addEventListener('load', async () => {
                     }
                 },
                 axisY: {
+                    stripLines: [
+                        {
+                            value: csChartPointsSJC.at(-1).y[3],
+                            lineDashType: "dot",
+                            label: csChartPointsSJC.at(-1).y[3].toLocaleString(),
+                            color: csChartPointsSJC.at(-1).color,
+                            labelAlign: "near",
+                            labelPlacement: "outside",
+                            labelFontColor: "white",
+                            labelBackgroundColor: csChartPointsSJC.at(-1).color
+                        }
+                    ]
                     //prefix: "VND "
                 },
                 data: [{
@@ -43,7 +58,5 @@ window.addEventListener('load', async () => {
         }
     });
 
-    initCandlestickData(await (await fetch("./data/data-sjc.json")).json(),
-        1000, csChartPointsSJC, csNavigatePointsSJC, csScaleBreakPointsSJC)
     candlestickChartSJC.render();
 })
