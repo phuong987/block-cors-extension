@@ -8,14 +8,19 @@
     <script type="text/javascript" src="lib/canvasjs.stock.min.js"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
-    <script type="text/javascript" src="./candlestick-chart.js"></script>
+    <script type="text/javascript" src="./candlestick-chart-pnj.js"></script>
+    <script type="text/javascript" src="./candlestick-chart-sjc.js"></script>
+    <script type="text/javascript" src="./candlestick-chart-doji.js"></script>
+
     <script type="text/javascript" src="./line-chart.js"></script>
-    <script type="text/javascript" src="./line-chart-sjc.js"></script>
-    <script type="text/javascript" src="./line-chart-doji.js"></script>
+
     <script type="text/javascript" src="./indexedDB.js"></script>
+    <script type="text/javascript" src="./utils.js"></script>
 </head>
 <body>
-<div id="candlestickChartContainer" style="height: 600px; width: 100%;"></div>
+<div id="candlestickChartPNJContainer" style="height: 600px; width: 100%;"></div>
+<div id="candlestickChartSJCContainer" style="height: 600px; width: 100%;"></div>
+<div id="candlestickChartDOJIContainer" style="height: 600px; width: 100%;"></div>
 <div id="lineChartContainer" style="height: 600px; width: 100%;"></div>
 
 <h3 style="font-size: 1.5rem; line-height: 2rem; text-align: center;">

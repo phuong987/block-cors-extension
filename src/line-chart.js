@@ -1,5 +1,6 @@
 let lineChart;
-window.addEventListener('load', () => {
+let lineChartPointsDOJI = [], lineChartPointsSJC = [];
+function newLineChart() {
     lineChart = new CanvasJS.StockChart("lineChartContainer",{
         theme: "light2",
         exportEnabled: true,
@@ -11,12 +12,6 @@ window.addEventListener('load', () => {
                     crosshair: {
                         enabled: true,
                         snapToDataPoint: true
-                    },
-                    scaleBreaks: {
-                        type: "straight",
-                        lineThickness: 0,
-                        spacing: 0,
-                        customBreaks: sb
                     }
                 },
                 axisY: {
@@ -42,7 +37,7 @@ window.addEventListener('load', () => {
                         showInLegend: false,
                         markerSize: 0,
                         yValueFormatString: "#,###.## VND",
-                        dataPoints: dps3
+                        dataPoints: lineChartPointsPNJ
                     },
                     {
                         type:"line",
@@ -51,7 +46,7 @@ window.addEventListener('load', () => {
                         showInLegend: false,
                         markerSize: 0,
                         yValueFormatString: "#,###.## VND",
-                        dataPoints: dps4
+                        dataPoints: lineChartPointsSJC
                     },
                     {
                         type:"line",
@@ -60,14 +55,14 @@ window.addEventListener('load', () => {
                         showInLegend: false,
                         markerSize: 0,
                         yValueFormatString: "#,###.## VND",
-                        dataPoints: dps5
+                        dataPoints: lineChartPointsDOJI
                     }
                 ]
             }
         ],
         navigator: {
             data: [{
-                dataPoints: dps2
+                dataPoints: lineChartPointsPNJ
             }],
             slider: {
                 minimum: new Date(2023, 1, 1),
@@ -75,7 +70,7 @@ window.addEventListener('load', () => {
             }
         }
     });
-})
+}
 
 function toggleDataSeries(e){
     e.dataSeries.visible = !(typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible);

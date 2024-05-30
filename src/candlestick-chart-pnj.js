@@ -1,14 +1,15 @@
-let dps1 = [], dps2 = [], sb = [];
-let dps3 = [];
 let risingColor = "#089981";
 let fallingColor = "red";
 let today = new Date ();
 let startDate = new Date("2023-01-01T00:00:00.000+07:00");
 let mul = 1000000;
-let candlestickChart;
+
+let csChartPointsPNJ = [], csNavigatePointsPNJ = [], csScaleBreakPointsPNJ = [];
+let candlestickChartPNJ;
+let lineChartPointsPNJ = [];
 
 window.addEventListener('load', () => {
-    candlestickChart = new CanvasJS.StockChart("candlestickChartContainer",{
+    candlestickChartPNJ = new CanvasJS.StockChart("candlestickChartPNJContainer",{
         theme: "light2",
         exportEnabled: true,
         title:{text:"Candlestick Chart"},
@@ -24,7 +25,7 @@ window.addEventListener('load', () => {
                         type: "straight",
                         lineThickness: 0,
                         spacing: 0,
-                        customBreaks: sb
+                        customBreaks: csScaleBreakPointsPNJ
                     }
                 },
                 axisY: {
@@ -35,13 +36,13 @@ window.addEventListener('load', () => {
                     yValueFormatString: "#,###.## VND",
                     risingColor: risingColor,
                     fallingColor: fallingColor,
-                    dataPoints : dps1
+                    dataPoints : csChartPointsPNJ
                 }]
             }
         ],
         navigator: {
             data: [{
-                dataPoints: dps2
+                dataPoints: csNavigatePointsPNJ
             }],
             slider: {
                 minimum: new Date(2023, 1, 1),
@@ -59,9 +60,13 @@ window.addEventListener('load', () => {
             await updateDataForDateRange(newestDate, today);
         }
 
-        loadData().then(data => {
-            initChartData(data);
-            candlestickChart.render();
+        loadData().then(async data => {
+            initCandlestickDataPNJ(data, mul, csChartPointsPNJ, csNavigatePointsPNJ, csScaleBreakPointsPNJ);
+            candlestickChartPNJ.render();
+
+            initLineData(await (await fetch("./data/data-doji.json")).json(), lineChartPointsDOJI, 1000);
+            initLineData(await (await fetch("./data/data-sjc.json")).json(), lineChartPointsSJC, 1000);
+            newLineChart();
             lineChart.render();
         });
     });
@@ -81,14 +86,14 @@ window.addEventListener('load', () => {
     // window.webkitRequestFileSystem(window.PERSISTENT, 1024*1024, onInitFs, errorHandler);
 })
 
-let initChartData = (chartData) => {
+let initCandlestickDataPNJ = (data, mul, chartPointsData, navigatePointsData, scaleBreakPoints) => {
     let newestDate = 0;
     let previousClose = null;
 
-    for (const element of chartData) {
+    for (const element of data) {
         let open = previousClose !== null ? previousClose : element.low;
 
-        dps1.push({
+        chartPointsData.push({
             x: new Date(element.date + "T00:00:00.000+07:00"),
             y: [
                 Number(open * mul),
@@ -98,13 +103,13 @@ let initChartData = (chartData) => {
             ],
             color: open <= element.close ? risingColor : fallingColor
         });
-        dps2.push({
+        navigatePointsData.push({
             x: new Date(element.date + "T00:00:00.000+07:00"),
             y: Number(element.close)
         });
         previousClose = element.close;
 
-        initGapData(element, open <= element.close, mul);
+        initLineDataPNJ(element, open <= element.close, mul);
 
         if (newestDate === 0) {
             newestDate = element.date;
@@ -117,7 +122,7 @@ let initChartData = (chartData) => {
             startDate.setDate(startDate.getDate() + 1);
             let endDate = new Date(newestDate + "T23:59:59.999+07:00");
             endDate.setDate(endDate.getDate() + dateDiff - 1);
-            sb.push({
+            scaleBreakPoints.push({
                 startValue: startDate,
                 endValue: endDate
             })
@@ -126,7 +131,7 @@ let initChartData = (chartData) => {
     }
 }
 
-let initGapData = (element, isRising, mul) => {
+let initLineDataPNJ = (element, isRising, mul) => {
     let additional = element.additional;
     let getMax = isRising;
     let gapMax, gapMin;
@@ -149,13 +154,13 @@ let initGapData = (element, isRising, mul) => {
         detail += "&nbsp;&nbsp;&nbsp;" + (gap * mul).toLocaleString() + " " + change.timestamp.split(" ")[1] + "<br/>";
     }
     if (getMax) {
-        dps3.push({
+        lineChartPointsPNJ.push({
             x: new Date(element.date + "T00:00:00.000+07:00"),
             y: gapMax * mul,
             detail: detail.slice(0, detail.length - 5)
         });
     } else {
-        dps3.push({
+        lineChartPointsPNJ.push({
             x: new Date(element.date + "T00:00:00.000+07:00"),
             y: gapMin * mul,
             detail: detail.slice(0, detail.length - 5)
@@ -163,7 +168,7 @@ let initGapData = (element, isRising, mul) => {
     }
 }
 
-updateDataForDateRange = async (startDate, endDate) => {
+async function updateDataForDateRange(startDate, endDate) {
     let dateList = [];
     let currentDate = startDate;
 
@@ -197,7 +202,7 @@ updateDataForDateRange = async (startDate, endDate) => {
     }
 }
 
-getData = async (date) => {
+async function getData(date) {
     const [year, month, day] = date.split('-');
     const url = `https://giavang.pnj.com.vn/history?gold_history_day=${day}&gold_history_month=${month}&gold_history_year=${year}`;
     const htmlRegex = /TPHCM <\/th> <\/tr> <\/thead>.*?PNJ<\/td> (.*?) <tr> <td valign="middle" align="center" rowspan="[0-9]+">SJC/;
