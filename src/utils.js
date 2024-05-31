@@ -14,6 +14,9 @@ let initCandlestickData = (data, mul, chartPointsData, navigatePointsData, scale
 
         if (i === data.length - 1 || !data[i+1].time.includes(currentTime.split(' ')[0])) {
             let currentDateString = getDateFromTimestamp(currentTime);
+            let change = ((element.sell - previousClose) * 100 / previousClose);
+            change = change < 0 ? change.toFixed(2).replace("-","–") : "+" + change.toFixed(2);
+
             chartPointsData.push({
                 x: new Date(currentDateString + "T00:00:00.000+07:00"),
                 y: [
@@ -22,6 +25,7 @@ let initCandlestickData = (data, mul, chartPointsData, navigatePointsData, scale
                     Number(currentLow * mul),
                     Number(element.sell * mul)
                 ],
+                change: change,
                 color: previousClose <= element.sell ? risingColor : fallingColor
             });
             navigatePointsData.push({

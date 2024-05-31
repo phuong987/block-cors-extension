@@ -59,6 +59,16 @@ window.addEventListener('load', async () => {
                     ]
                     //prefix: "VND "
                 },
+                toolTip: {
+                    shared: true,
+                    enabled: true,
+                    content: "<span style='\"'color: {color};'\"'>{x}" +
+                        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{change}%</span><br/>" +
+                        "Open:&nbsp;&nbsp;{y[0]}<br/>" +
+                        "High:&nbsp;&nbsp;&nbsp;{y[1]}<br/>" +
+                        "Low:&nbsp;&nbsp;&nbsp;&nbsp;{y[2]}<br/>" +
+                        "Close:&nbsp;&nbsp;{y[3]}<br/>"
+                },
                 data: [{
                     type: "candlestick",
                     yValueFormatString: "#,###.## VND",
@@ -104,6 +114,8 @@ let initCandlestickDataPNJ = (data, mul, chartPointsData, navigatePointsData, sc
 
     for (const element of data) {
         let open = previousClose !== null ? previousClose : element.low;
+        let change = ((element.close - open) * 100 / open);
+        change = change < 0 ? change.toFixed(2).replace("-","–") : "+" + change.toFixed(2);
 
         chartPointsData.push({
             x: new Date(element.date + "T00:00:00.000+07:00"),
@@ -113,6 +125,7 @@ let initCandlestickDataPNJ = (data, mul, chartPointsData, navigatePointsData, sc
                 Number(element.low * mul),
                 Number(element.close * mul)
             ],
+            change: change,
             color: open <= element.close ? risingColor : fallingColor
         });
         navigatePointsData.push({

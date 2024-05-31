@@ -38,6 +38,16 @@ window.addEventListener('load', async () => {
                     ]
                     //prefix: "VND "
                 },
+                toolTip: {
+                    shared: true,
+                    enabled: true,
+                    content: "<span style='\"'color: {color};'\"'>{x}" +
+                        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{change}%</span><br/>" +
+                        "Open:&nbsp;&nbsp;{y[0]}<br/>" +
+                        "High:&nbsp;&nbsp;&nbsp;{y[1]}<br/>" +
+                        "Low:&nbsp;&nbsp;&nbsp;&nbsp;{y[2]}<br/>" +
+                        "Close:&nbsp;&nbsp;{y[3]}<br/>"
+                },
                 data: [{
                     type: "candlestick",
                     yValueFormatString: "#,###.## VND",
